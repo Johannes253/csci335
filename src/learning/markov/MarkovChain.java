@@ -80,7 +80,21 @@ public class MarkovChain<L,S> {
     // Should pass MajorMarkovTest.testSentenceDistributions()
     public LinkedHashMap<L,Double> labelDistribution(ArrayList<S> sequence) {
         // TODO: YOUR CODE HERE
-        return null;
+            LinkedHashMap<L, Double> distribution = new LinkedHashMap<>();
+
+            double totalLikelyhood = 0.0;
+            for (L label : label2symbol2symbol.keySet()) {
+                double likelyhood = probability(sequence, label);
+                distribution.put(label, likelyhood);
+                totalLikelyhood += likelyhood;
+            }
+
+            for (L label : distribution.keySet()) {
+                double normalizedProbability = distribution.get(label) / totalLikelyhood;
+                distribution.put(label, normalizedProbability);
+            }
+
+            return distribution;
     }
 
     // Calls labelDistribution(). Returns the label with highest probability.
