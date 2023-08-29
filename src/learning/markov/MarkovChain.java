@@ -50,7 +50,30 @@ public class MarkovChain<L,S> {
     // transition. This helps avoid sending the probability to zero.
     public double probability(ArrayList<S> sequence, L label) {
         // TODO: YOUR CODE HERE
-        return 0.0;
+        if (sequence == null || sequence.isEmpty() || !label2symbol2symbol.containsKey(label))
+            return 0.0;
+
+
+        HashMap<Optional<S>, Histogram<S>> innerMap = label2symbol2symbol.get(label);
+
+        double probability = 1.0;
+        Optional<S> prev = Optional.empty();
+
+        for (S currentSymbol : sequence) {
+            Histogram<S> histogram = innerMap.get(prev);
+
+            int transitionCount = histogram != null ? histogram.getCountFor(currentSymbol) : 0;
+            int totalTransitions = histogram != null ? histogram.getTotalCounts() : 0;
+
+            int vocabularySize = innerMap.size();
+
+            double transitionProbability = (double) (transitionCount + 1) / (totalTransitions + vocabularySize + 1);
+            probability *= transitionProbability;
+
+            prev = Optional.of(currentSymbol);
+        }
+
+        return probability;
     }
 
     // Return a map from each label to P(label | sequence).
