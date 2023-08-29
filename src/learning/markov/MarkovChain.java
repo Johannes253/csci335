@@ -101,6 +101,7 @@ public class MarkovChain<L,S> {
     // Should pass MajorMarkovTest.bestChainTest()
     public L bestMatchingChain(ArrayList<S> sequence) {
         // TODO: YOUR CODE HERE
-        return null;
+        LinkedHashMap<L, Double> distribution = labelDistribution(sequence);
+        return distribution.entrySet().stream().max(Map.Entry.comparingByValue()).get().getKey();
     }
 }
