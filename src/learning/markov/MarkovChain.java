@@ -32,14 +32,13 @@ public class MarkovChain<L,S> {
     public void count(Optional<S> prev, L label, S next) {
         // TODO: YOUR CODE HERE
 
-        if (!label2symbol2symbol.containsKey(label)) {
-            label2symbol2symbol.put(label, new HashMap<>());
-        }
+        if (!label2symbol2symbol.containsKey(label))
+                label2symbol2symbol.put(label, new HashMap<>());
+
         HashMap<Optional<S>, Histogram<S>> innerMap = label2symbol2symbol.get(label);
 
-        if (!innerMap.containsKey(prev)) {
+        if (!innerMap.containsKey(prev))
             innerMap.put(prev, new Histogram<>());
-        }
 
         innerMap.get(prev).bump(next);
     }
