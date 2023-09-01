@@ -36,13 +36,28 @@ public class QTable {
     //  visits. Returns false otherwise.
     //  Should pass QTableTest.testIsExploring()
     public boolean isExploring(int state) {
+        for (int a = 0; a < visits[state].length; a++) {
+            if (visits[state][a] < targetVisits) {
+                return true;
+            }
+        }
         return false;
     }
 
     // TODO: Returns the least visited action in state.
     //  Should pass QTableTest.testLeastVisitedAction()
     public int leastVisitedAction(int state) {
-        return -1;
+        int minVisits = Integer.MAX_VALUE;
+        int leastVisitedAction = -1;
+
+        for (int a = 0; a < visits[state].length; a++) {
+            if (visits[state][a] < minVisits) {
+                minVisits = visits[state][a];
+                leastVisitedAction = a;
+            }
+        }
+
+        return leastVisitedAction;
     }
 
     // TODO:
