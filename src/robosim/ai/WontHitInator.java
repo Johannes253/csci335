@@ -1,9 +1,6 @@
 package robosim.ai;
 
-import robosim.core.Controller;
-import robosim.core.Direction;
-import robosim.core.Polar;
-import robosim.core.Simulator;
+import robosim.core.*;
 import robosim.reinforcement.QTable;
 
 import java.util.Optional;
@@ -14,7 +11,7 @@ public class WontHitInator implements Controller {
 
     public WontHitInator() {
         int states = 100;
-        int actions = 2;
+        int actions = Action.values().length;
         int startState = 0;
         int targetVisits = 50;
         int rateConstant = 5;
@@ -76,13 +73,8 @@ public class WontHitInator implements Controller {
         }
 
         int nextActionIndex = qTable.senseActLearn(currentState, reward);
+        Action nextAction = Action.values()[nextActionIndex];
 
-        Direction nextAction = Direction.values()[nextActionIndex];
-
-        if(nextAction == Direction.FWD || nextAction == Direction.REV) {
-            sim.translate(nextAction);
-        } else {
-            sim.turn(nextAction);
-        }
+        nextAction.applyTo(sim);
     }
 }
