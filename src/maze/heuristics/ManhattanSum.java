@@ -3,6 +3,7 @@ package maze.heuristics;
 import maze.core.MazeExplorer;
 import core.Pos;
 
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.ToIntFunction;
 
@@ -11,7 +12,9 @@ public class ManhattanSum implements ToIntFunction<MazeExplorer> {
     @Override
     public int applyAsInt(MazeExplorer explorer) {
         Pos current = explorer.getLocation();
-        Set<Pos> allTreasures = explorer.getAllTreasureFromMaze();
+
+        Set<Pos> allTreasures = new HashSet<>(explorer.getAllTreasureFromMaze());
+
         Set<Pos> foundTreasures = explorer.getAllTreasureFound();
         allTreasures.removeAll(foundTreasures);
 
