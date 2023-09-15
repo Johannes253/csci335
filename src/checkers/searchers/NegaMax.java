@@ -3,6 +3,8 @@ package checkers.searchers;
 import checkers.core.Checkerboard;
 import checkers.core.CheckersSearcher;
 import checkers.core.Move;
+import checkers.core.PlayerColor;
+import checkers.gui.Checkers;
 import core.Duple;
 
 import java.util.Optional;
@@ -26,7 +28,24 @@ public class NegaMax extends CheckersSearcher {
 
     @Override
     public Optional<Duple<Integer, Move>> selectMove(Checkerboard board) {
-        return Optional.empty();
+        Move bestMove = null;
+        int bestMoveValue = Integer.MIN_VALUE;
+        PlayerColor currentPlayer = board.getCurrentPlayer();
+
+        for(Move move : board.getLegalMoves(currentPlayer)) {
+            Checkerboard nextBoardMove = board.duplicate();
+            nextBoardMove.move(move);
+
+            int value = -negaMax(nextBoardMove, getDepthLimit() - 1);
+
+
+            if (bestMoveValue > value) {
+                bestMoveValue = value;
+                bestMove = move;
+            }
+        }
+
+            return (bestMove == null) ? Optional.empty() : Optional.of(new Duple<>(bestMoveValue, bestMove));
     }
 
     private int negaMax(Checkerboard board, int depth) {
