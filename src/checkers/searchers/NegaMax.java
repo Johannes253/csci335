@@ -15,11 +15,11 @@ public class NegaMax extends CheckersSearcher {
     private int numNodesExpanded;
     private final ToIntFunction<Checkerboard> evaluator;
 
-    public NegaMax(ToIntFunction<Checkerboard> e, int numNodesExpanded, ToIntFunction<Checkerboard> evaluator) {
+    public NegaMax(ToIntFunction<Checkerboard> e) {
         super(e);
-        this.numNodesExpanded = numNodesExpanded;
-        this.evaluator = evaluator;
+        this.evaluator = e;
     }
+
 
     @Override
     public int numNodesExpanded() {
@@ -36,10 +36,11 @@ public class NegaMax extends CheckersSearcher {
             Checkerboard nextBoardMove = board.duplicate();
             nextBoardMove.move(move);
 
-            int value = -negaMax(nextBoardMove, getDepthLimit() - 1);
+            int depth = getDepthLimit();
+            int value = -negaMax(nextBoardMove, depth - 1);
 
 
-            if (bestMoveValue > value) {
+            if (bestMoveValue < value) {
                 bestMoveValue = value;
                 bestMove = move;
             }
@@ -50,7 +51,7 @@ public class NegaMax extends CheckersSearcher {
 
     private int negaMax(Checkerboard board, int depth) {
         numNodesExpanded++;
-
+        System.out.println("Current Depth: " + depth);
         if (board.gameOver() || depth == 0)
             return evaluator.applyAsInt(board);
 
