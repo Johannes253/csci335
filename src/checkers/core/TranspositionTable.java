@@ -2,11 +2,7 @@ package checkers.core;
 import java.util.HashMap;
 
 public class TranspositionTable {
-    private final HashMap<Integer, TranspositionTableEntry> transpotable;
-
-    public TranspositionTable(HashMap<Integer, TranspositionTableEntry> transpotable) {
-        this.transpotable = transpotable;
-    }
+    private final HashMap<Integer, TranspositionTableEntry> transpotable = new HashMap<Integer, TranspositionTableEntry>();
 
     public boolean containsKey(Checkerboard board) {
         return transpotable.containsKey(board.hashCode());
@@ -23,20 +19,3 @@ public class TranspositionTable {
 
 }
 
-class TranspositionTableEntry {
-    private final int depth;
-    private final int score;
-
-    public TranspositionTableEntry(int score, int depth) {
-        this.score = score;
-        this.depth = depth;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public int getDepth() {
-        return depth;
-    }
-}
