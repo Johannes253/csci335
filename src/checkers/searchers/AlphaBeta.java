@@ -1,9 +1,6 @@
 package checkers.searchers;
 
-import checkers.core.Checkerboard;
-import checkers.core.CheckersSearcher;
-import checkers.core.Move;
-import checkers.core.PlayerColor;
+import checkers.core.*;
 import core.Duple;
 
 import java.util.Optional;
@@ -13,6 +10,7 @@ public class AlphaBeta extends CheckersSearcher {
 
     private int numNodesExpanded;
     private final ToIntFunction<Checkerboard> evaluator;
+    private TranspositionTable transpoTable = new TranspositionTable();
 
     public AlphaBeta(ToIntFunction<Checkerboard> e) {
         super(e);
@@ -57,11 +55,14 @@ public class AlphaBeta extends CheckersSearcher {
         numNodesExpanded++;
         int max = Integer.MIN_VALUE;
 
+        if(transpoTable.containsKey(board)){
+            TranspositionTableEntry transpoentry = transpoTable.getEntry(board);
+            if(depth < transpoentry.getDepth())
+                return transpoentry.getScore();
+        }
+
         if (board.gameOver() || depth == 0)
             return evaluator.applyAsInt(board);
-
-
-
 
         for (Checkerboard nextBoard : board.getNextBoards()) {
             int value = -alphaBeta(nextBoard, depth - 1, alpha, beta);
@@ -75,7 +76,7 @@ public class AlphaBeta extends CheckersSearcher {
             if(alpha >= beta)
                 break;
         }
-
+        transpoTable.insertEntry(board, max, depth);
         return max;
     }
 }
