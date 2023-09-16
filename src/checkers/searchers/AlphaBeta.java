@@ -11,6 +11,7 @@ public class AlphaBeta extends CheckersSearcher {
     private int numNodesExpanded;
     private final ToIntFunction<Checkerboard> evaluator;
     private TranspositionTable transpoTable = new TranspositionTable();
+    private static final int singExtension = 10;
 
     public AlphaBeta(ToIntFunction<Checkerboard> e) {
         super(e);
@@ -64,11 +65,17 @@ public class AlphaBeta extends CheckersSearcher {
         if (board.gameOver() || depth == 0)
             return evaluator.applyAsInt(board);
 
+        Move bestMove = null;
+
         for (Checkerboard nextBoard : board.getNextBoards()) {
+            if(singExtensionneeded(board, depth, alpha, bestMove))
+                depth ++;
             int value = -alphaBeta(nextBoard, depth - 1, alpha, beta);
 
-            if(max < value)
+            if(max < value) {
                 max = value;
+                bestMove = nextBoard.getLastMove();
+            }
 
             if(value < alpha)
                 alpha = value;
@@ -77,6 +84,38 @@ public class AlphaBeta extends CheckersSearcher {
                 break;
         }
         transpoTable.insertEntry(board, max, depth);
+        return max;
+    }
+
+    private boolean singExtensionneeded(Checkerboard board, int depth, int alpha, Move bestMove) {
+        if(depth < 2 || bestMove ==null)
+            return false;
+
+        int reduceDepth = depth -2;
+        int score = searchWithoutCurMove(board, reduceDepth, alpha, bestMove);
+
+        return score < alpha - singExtension;
+
+    }
+
+    private int searchWithoutCurMove(Checkerboard board, int reduceDepth, int alpha, Move excluedBestMove) {
+        int max = Integer.MIN_VALUE;
+        int beta = alpha +1;
+        for(Checkerboard newBoard : board.getNextBoards()){
+            if(newBoard.getLastMove().equals(excluedBestMove))
+                continue;
+
+            int value = -alphaBeta(newBoard, reduceDepth, alpha, beta);
+
+            if (max < value)
+                max = value;
+
+            if(value > alpha)
+                alpha = value;
+
+            if(alpha >= beta)
+                break;
+        }
         return max;
     }
 }
