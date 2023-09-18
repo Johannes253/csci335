@@ -66,8 +66,10 @@ public class AlphaBeta extends CheckersSearcher {
                 return transpoentry.getScore();
         }
 
-        if (board.gameOver() || depth == 0)
-            return evaluator.applyAsInt(board);
+        if (depth <= 0 || board.gameOver())
+            return (board.turnIsRepeating() && board.pieceCanStillCapture(board.getLastMove().getEndRow(),
+                    board.getLastMove().getEndCol()) ? alphaBeta(board, 1, alpha, beta) : evaluator.applyAsInt(board));
+
 
         Move bestMove = null;
 
