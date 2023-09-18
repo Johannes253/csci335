@@ -37,6 +37,9 @@ public class NegaMax extends CheckersSearcher {
             nextBoardMove.move(move);
 
             int depth = getDepthLimit();
+            if (nextBoardMove.turnIsRepeating())
+                depth++;
+
             int value = -negaMax(nextBoardMove, depth - 1);
 
 
