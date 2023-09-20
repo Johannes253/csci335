@@ -27,10 +27,10 @@ public class AlphaBeta extends CheckersSearcher {
     @Override
     public Optional<Duple<Integer, Move>> selectMove(Checkerboard board) {
         Move bestMove = null;
-        int bestMoveValue = Integer.MIN_VALUE;
+        int bestMoveValue = -Integer.MAX_VALUE;
         PlayerColor currentPlayer = board.getCurrentPlayer();
-        int alpha = Integer.MAX_VALUE;
-        int beta = Integer.MIN_VALUE;
+        int alpha = -Integer.MAX_VALUE;
+        int beta = Integer.MAX_VALUE;
 
 
         for(Move move : board.getLegalMoves(currentPlayer)) {
@@ -58,7 +58,7 @@ public class AlphaBeta extends CheckersSearcher {
 
     private int alphaBeta(Checkerboard board, int depth, int alpha, int beta) {
         numNodesExpanded++;
-        int max = Integer.MIN_VALUE;
+        int max = -Integer.MAX_VALUE;
 
         if(transpoTable.containsKey(board)){
             TranspositionTableEntry transpoentry = transpoTable.getEntry(board);
@@ -66,24 +66,25 @@ public class AlphaBeta extends CheckersSearcher {
                 return transpoentry.getScore();
         }
 
-        if (depth <= 0 || board.gameOver())
-            return (board.turnIsRepeating() && board.pieceCanStillCapture(board.getLastMove().getEndRow(),
-                    board.getLastMove().getEndCol()) ? alphaBeta(board, 1, alpha, beta) : evaluator.applyAsInt(board));
-
+        if (depth <= 0) {
+            if (board.getLastMove().isCapture())
+                depth = 1;
+            else
+                return evaluator.applyAsInt(board);
+        }
 
         Move bestMove = null;
-
+        PlayerColor currentPlayer = board.getCurrentPlayer();
         for (Checkerboard nextBoard : board.getNextBoards()) {
             if(singExtensionneeded(board, depth, alpha, bestMove))
                 depth ++;
-            int value = -alphaBeta(nextBoard, depth - 1, alpha, beta);
+            int value;
+            if (currentPlayer == nextBoard.getCurrentPlayer())
+                value = alphaBeta(nextBoard, depth - 1, alpha, beta);
+            else
+                value = -alphaBeta(nextBoard, depth - 1, -beta, -alpha);
 
-            if(max < value) {
-                max = value;
-                bestMove = nextBoard.getLastMove();
-            }
-
-            if(value < alpha)
+            if(value > alpha)
                 alpha = value;
 
             if(alpha >= beta)
@@ -105,7 +106,7 @@ public class AlphaBeta extends CheckersSearcher {
     }
 
     private int searchWithoutCurMove(Checkerboard board, int reduceDepth, int alpha, Move excluedBestMove) {
-        int max = Integer.MIN_VALUE;
+        int max = -Integer.MAX_VALUE;
         int beta = alpha +1;
         for(Checkerboard newBoard : board.getNextBoards()){
             if(newBoard.getLastMove().equals(excluedBestMove))
