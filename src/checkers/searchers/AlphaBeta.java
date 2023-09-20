@@ -4,6 +4,7 @@ import checkers.core.*;
 import core.Duple;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 
 public class AlphaBeta extends CheckersSearcher {
@@ -31,11 +32,15 @@ public class AlphaBeta extends CheckersSearcher {
         PlayerColor currentPlayer = board.getCurrentPlayer();
         int alpha = -Integer.MAX_VALUE;
         int beta = Integer.MAX_VALUE;
-
+        Iterable<Move> legalMoves = board.getLegalMoves(currentPlayer);
 
         for(Move move : board.getLegalMoves(currentPlayer)) {
             Checkerboard nextBoardMove = board.duplicate();
             nextBoardMove.move(move);
+
+            if(bestMove == null)
+                bestMove = legalMoves.iterator().next();
+
 
             int depth = getDepthLimit();
 
@@ -83,6 +88,10 @@ public class AlphaBeta extends CheckersSearcher {
                 value = alphaBeta(nextBoard, depth - 1, alpha, beta);
             else
                 value = -alphaBeta(nextBoard, depth - 1, -beta, -alpha);
+
+            if(value > max)
+                max = value;
+
 
             if(value > alpha)
                 alpha = value;
