@@ -1,21 +1,20 @@
 package checkers.core;
+
 import java.util.HashMap;
 
 public class TranspositionTable {
-    private final HashMap<Integer, TranspositionTableEntry> transpotable = new HashMap<Integer, TranspositionTableEntry>();
+
+    private final HashMap<Integer, TranspositionTableEntry> transpoTable = new HashMap<>();
 
     public boolean containsKey(Checkerboard board) {
-        return transpotable.containsKey(board.hashCode());
+        return transpoTable.containsKey(board.hashCode());
     }
 
-    public void insertEntry(Checkerboard board, int score, int depth) {
-        transpotable.put(board.hashCode(), new TranspositionTableEntry(score, depth));
+    public void insertEntry(Checkerboard board, int score, int depth, BoundType boundType) {
+        transpoTable.put(board.hashCode(), new TranspositionTableEntry(score, depth, boundType));
     }
 
     public TranspositionTableEntry getEntry(Checkerboard board) {
-        return transpotable.get(board.hashCode());
+        return transpoTable.get(board.hashCode());
     }
-
-
 }
-

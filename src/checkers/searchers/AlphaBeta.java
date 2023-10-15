@@ -65,11 +65,24 @@ public class AlphaBeta extends CheckersSearcher {
         numNodesExpanded++;
         int max = -Integer.MAX_VALUE;
 
-        if(transpoTable.containsKey(board)){
-            TranspositionTableEntry transpoentry = transpoTable.getEntry(board);
-            if(depth < transpoentry.getDepth())
-                return transpoentry.getScore();
+        if (transpoTable.containsKey(board)) {
+            TranspositionTableEntry transpoEntry = transpoTable.getEntry(board);
+            if (depth <= transpoEntry.getDepth()) {
+                switch (transpoEntry.getBoundType()) {
+                    case EXACT:
+                        return transpoEntry.getScore();
+                    case LOWER:
+                        alpha = Math.max(alpha, transpoEntry.getScore());
+                        break;
+                    case UPPER:
+                        beta = Math.min(beta, transpoEntry.getScore());
+                        break;
+                }
+                if (alpha >= beta)
+                    return transpoEntry.getScore(); // Alpha-beta cut-off
+            }
         }
+
 
         if (depth <= 0) {
             if (board.getLastMove().isCapture())
@@ -79,6 +92,7 @@ public class AlphaBeta extends CheckersSearcher {
         }
 
         Move bestMove = null;
+       int originalalpha = alpha;
         PlayerColor currentPlayer = board.getCurrentPlayer();
         for (Checkerboard nextBoard : board.getNextBoards()) {
             if(singExtensionneeded(board, depth, alpha, bestMove))
@@ -99,7 +113,13 @@ public class AlphaBeta extends CheckersSearcher {
             if(alpha >= beta)
                 break;
         }
-        transpoTable.insertEntry(board, max, depth);
+        if (max <= originalalpha)
+            transpoTable.insertEntry(board, max, depth, BoundType.UPPER);
+        else if (max >= beta)
+            transpoTable.insertEntry(board, max, depth, BoundType.LOWER);
+        else
+            transpoTable.insertEntry(board, max, depth, BoundType.EXACT);
+
         return max;
     }
 
