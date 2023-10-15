@@ -36,9 +36,25 @@ public class NaiveBayes<V,L,F> implements Classifier<V,L> {
     //   * Increment the feature count for the item's label by the number of appearances of the feature.
     @Override
     public void train(ArrayList<Duple<V, L>> data) {
-        // Your code here
-    }
+        for (Duple<V, L> item : data) {
+            V value = item.getFirst();
+            L label = item.getSecond();
 
+            priors.bump(label);
+
+            Histogram<F> featureCounts = featuresByLabel.getOrDefault(label, new Histogram<>());
+            featuresByLabel.put(label, featureCounts);
+
+            ArrayList<Duple<F, Integer>> features = allFeaturesFrom.apply(value);
+            for (Duple<F, Integer> featureCount : features) {
+                F feature = featureCount.getFirst();
+                Integer count = featureCount.getSecond();
+
+
+                featureCounts.bumpBy(feature, count);
+            }
+        }
+    }
     // To classify:
     // * For each label:
     //   * Calculate the product of P(Label) * (P(Label | Feature) for all features)
@@ -47,7 +63,28 @@ public class NaiveBayes<V,L,F> implements Classifier<V,L> {
     // * Whichever label produces the highest product is the classification.
     @Override
     public L classify(V value) {
-        // Your code here.
-        return null;
+        ArrayList<Duple<F, Integer>> features = allFeaturesFrom.apply(value);
+        L bestLabel = null;
+        double bestProbability = -1.0;
+
+        for (L label : featuresByLabel.keySet()) {
+            double probability = priors.getPortionFor(label);
+
+            for (Duple<F, Integer> featureCount : features) {
+                F feature = featureCount.getFirst();
+                Integer count = featureCount.getSecond();
+
+                Histogram<F> histogram = featuresByLabel.get(label);
+                double featureProbability = histogram.getPortionFor(feature);
+                probability *= Math.pow(featureProbability, count);
+            }
+
+            if (probability > bestProbability) {
+                bestProbability = probability;
+                bestLabel = label;
+            }
+        }
+
+        return bestLabel;
     }
 }
