@@ -31,7 +31,7 @@ public class Knn<V, L> implements Classifier<V, L> {
         for (Duple<V, L> d : data) {
             closestNeighbors.add(d);
             if (distance.applyAsDouble(value, d.getFirst()) <= distance.applyAsDouble(value, closestNeighbors.peek().getFirst())) {
-                closestNeighbors.remove();
+                closestNeighbors.poll();
                 closestNeighbors.add(d);
             }
         }
