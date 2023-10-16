@@ -79,10 +79,10 @@ public class SelfOrgMapTest {
         assertEquals(n2, som.getNode(2, 2));
 
         Drawing d2 = new Drawing(2, 2);
-        d1.set(0, 0, false);
-        d1.set(0, 1, true);
-        d1.set(1, 0, false);
-        d1.set(1, 1, false);
+        d2.set(0, 0, false);
+        d2.set(0, 1, true);
+        d2.set(1, 0, false);
+        d2.set(1, 1, false);
         FloatDrawing f2 = new FloatDrawing(d2);
         som.train(f2);
         assertEquals(new SOMPoint(2, 0), som.bestFor(f2));

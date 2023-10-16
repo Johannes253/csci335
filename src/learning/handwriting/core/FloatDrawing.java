@@ -80,7 +80,7 @@ public class FloatDrawing {
             }
         }
 
-        return Math.sqrt(sum);
+        return sum;
     }
 
     @Override

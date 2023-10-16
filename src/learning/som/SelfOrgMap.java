@@ -51,7 +51,7 @@ public class SelfOrgMap<V> {
     public void train(V example) {
         SOMPoint bestPoint = bestFor(example);
         V bestmatchingNode = getNode(bestPoint.x(), bestPoint.y());
-        V averageNode = averager.weightedAverage(bestmatchingNode, example, 0.9);
+        V averageNode = averager.weightedAverage(example, bestmatchingNode, 0.9);
         map[bestPoint.x()][bestPoint.y()] = averageNode;
 
         int[][] deltas = {
@@ -71,7 +71,7 @@ public class SelfOrgMap<V> {
 
                 if (inMap(neighbor)) {
                     V neighborNode = getNode(neighbor.x(), neighbor.y());
-                    V averageNeighborNode = averager.weightedAverage(neighborNode, example, 0.4);
+                    V averageNeighborNode = averager.weightedAverage(example, neighborNode, 0.4);
                     map[neighbor.x()][neighbor.y()] = averageNeighborNode;
                 }
             }
