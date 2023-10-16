@@ -54,18 +54,12 @@ public class SelfOrgMap<V> {
         V averageNode = averager.weightedAverage(example, bestmatchingNode, 0.9);
         map[bestPoint.x()][bestPoint.y()] = averageNode;
 
-        int[][] deltas = {
-                {-1, -1}, {-1, 0}, {-1, 1},
-                {0, -1},  {0, 0},  {0, 1},
-                {1, -1},  {1, 0},  {1, 1}
-        };
-
-        for (int[] delta : deltas) {
-            int i = delta[0];
-            int j = delta[1];
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
 
                 if (i == 0 && j == 0)
                     continue;
+
 
                 SOMPoint neighbor = new SOMPoint(bestPoint.x() + i, bestPoint.y() + j);
 
@@ -76,6 +70,7 @@ public class SelfOrgMap<V> {
                 }
             }
         }
+    }
 
     public V getNode(int x, int y) {
         return map[x][y];
