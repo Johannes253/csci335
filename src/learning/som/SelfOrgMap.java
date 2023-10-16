@@ -26,8 +26,20 @@ public class SelfOrgMap<V> {
     //  that is, the y-coordinate is updated in the outer loop, and the x-coordinate
     //  is updated in the inner loop.
     public SOMPoint bestFor(V example) {
-		// Your code here.
-        return null;
+        double minDistance = Double.MAX_VALUE;
+        SOMPoint bestPoint = null;
+
+        for (int y = 0; y < getMapHeight(); y++) {
+            for (int x = 0; x < getMapWidth(); x++) {
+                V node = getNode(x, y);
+                double currentDistance = distance.applyAsDouble(node, example);
+                if (currentDistance < minDistance) {
+                    minDistance = currentDistance;
+                    bestPoint = new SOMPoint(x, y);
+                }
+            }
+        }
+        return bestPoint;
     }
 
     // TODO: Train this SOM with example.
@@ -37,8 +49,33 @@ public class SelfOrgMap<V> {
     //  3. Update each neighbor of the best matching node that is in the map,
     //     using a learning rate of 0.4.
     public void train(V example) {
-        // Your code here
-    }
+        SOMPoint bestPoint = bestFor(example);
+        V bestmatchingNode = getNode(bestPoint.x(), bestPoint.y());
+        V averageNode = averager.weightedAverage(bestmatchingNode, example, 0.9);
+        map[bestPoint.x()][bestPoint.y()] = averageNode;
+
+        int[][] deltas = {
+                {-1, -1}, {-1, 0}, {-1, 1},
+                {0, -1},  {0, 0},  {0, 1},
+                {1, -1},  {1, 0},  {1, 1}
+        };
+
+        for (int[] delta : deltas) {
+            int i = delta[0];
+            int j = delta[1];
+
+                if (i == 0 && j == 0)
+                    continue;
+
+                SOMPoint neighbor = new SOMPoint(bestPoint.x() + i, bestPoint.y() + j);
+
+                if (inMap(neighbor)) {
+                    V neighborNode = getNode(neighbor.x(), neighbor.y());
+                    V averageNeighborNode = averager.weightedAverage(neighborNode, example, 0.4);
+                    map[neighbor.x()][neighbor.y()] = averageNeighborNode;
+                }
+            }
+        }
 
     public V getNode(int x, int y) {
         return map[x][y];
