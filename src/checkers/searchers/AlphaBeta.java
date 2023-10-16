@@ -46,9 +46,14 @@ public class AlphaBeta extends CheckersSearcher {
 
             if (nextBoardMove.turnIsRepeating())
                 depth++;
+            int value;
 
-            int value = -alphaBeta(nextBoardMove, depth - 1, alpha, beta);
-
+            if(board.getCurrentPlayer() != nextBoardMove.getCurrentPlayer()) {
+                value = -alphaBeta(nextBoardMove, depth - 1, -beta, -alpha);
+            }
+            else{
+                value = alphaBeta(nextBoardMove, depth - 1, alpha, beta);
+            }
 
             if (bestMoveValue < value) {
                 bestMoveValue = value;
