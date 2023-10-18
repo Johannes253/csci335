@@ -32,6 +32,7 @@ public class SelfOrgMap<V> {
         for (int y = 0; y < getMapHeight(); y++) {
             for (int x = 0; x < getMapWidth(); x++) {
                 V node = getNode(x, y);
+
                 double currentDistance = distance.applyAsDouble(node, example);
                 if (currentDistance < minDistance) {
                     minDistance = currentDistance;
@@ -57,7 +58,7 @@ public class SelfOrgMap<V> {
         for (int i = -1; i <= 1; i++) {
             for (int j = -1; j <= 1; j++) {
 
-                if (i == 0 && j == 0)
+                if (i == 0 && j == 0 || Math.abs(i) == Math.abs(j))
                     continue;
 
 
