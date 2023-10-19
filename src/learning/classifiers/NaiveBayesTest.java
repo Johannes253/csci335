@@ -34,5 +34,7 @@ public class NaiveBayesTest {
         for (Duple<String,String> datum: data) {
             assertEquals(datum.getSecond(), nb.classify(datum.getFirst()));
         }
+        assertEquals("B", nb.classify("yghi"));
+        assertEquals("A", nb.classify("aghi"));
     }
 }

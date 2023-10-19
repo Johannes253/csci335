@@ -75,7 +75,11 @@ public class NaiveBayes<V,L,F> implements Classifier<V,L> {
                 Integer count = featureCount.getSecond();
 
                 Histogram<F> histogram = featuresByLabel.get(label);
-                double featureProbability = histogram.getPortionFor(feature);
+                int featureForLabelCount = histogram.getCountFor(feature);
+                int totalFeatureCount = histogram.getTotalCounts();
+
+                double featureProbability = (double) (featureForLabelCount + 1) / (totalFeatureCount + featuresByLabel.keySet().size());
+
                 probability *= Math.pow(featureProbability, count);
             }
 
@@ -87,4 +91,5 @@ public class NaiveBayes<V,L,F> implements Classifier<V,L> {
 
         return bestLabel;
     }
+
 }
