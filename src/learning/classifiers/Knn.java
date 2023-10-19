@@ -30,15 +30,14 @@ public class Knn<V, L> implements Classifier<V, L> {
 
         for (Duple<V, L> d : data) {
             closestNeighbors.add(d);
-            if (distance.applyAsDouble(value, d.getFirst()) <= distance.applyAsDouble(value, closestNeighbors.peek().getFirst())) {
+            if (closestNeighbors.size() > k)
                 closestNeighbors.poll();
-                closestNeighbors.add(d);
-            }
         }
 
         Histogram<L> histogram = new Histogram<>();
         for (Duple<V, L> d : closestNeighbors)
             histogram.bump(d.getSecond());
+
 
         return histogram.getPluralityWinner();
     }
