@@ -3,8 +3,7 @@ package learning.decisiontree;
 import core.Duple;
 import learning.core.Histogram;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,10 +31,10 @@ public class DTTrainer<V,L, F, FV extends Comparable<FV>> {
 
 	// TODO: Call allFeatures.apply() to get the feature list. Then shuffle the list, retaining
 	//  only targetNumber features. Should pass DTTest.testReduced().
-	public static <V,L, F, FV  extends Comparable<FV>> ArrayList<Duple<F,FV>>
-	reducedFeatures(ArrayList<Duple<V,L>> data, Function<ArrayList<Duple<V, L>>, ArrayList<Duple<F,FV>>> allFeatures,
-					int targetNumber) {
-		return null;
+	public static <V,L, F, FV  extends Comparable<FV>> ArrayList<Duple<F,FV>> reducedFeatures(ArrayList<Duple<V,L>> data, Function<ArrayList<Duple<V, L>>, ArrayList<Duple<F,FV>>> allFeatures, int targetNumber) {
+		ArrayList<Duple<F,FV>> features = allFeatures.apply(data);
+		Collections.shuffle(features);
+		return new ArrayList<>(features.subList(0, Math.min(targetNumber, features.size())));
     }
 	
 	public DecisionTree<V,L,F,FV> train() {
@@ -50,7 +49,7 @@ public class DTTrainer<V,L, F, FV extends Comparable<FV>> {
 		// TODO: Implement the decision tree learning algorithm
 		if (numLabels(data) == 1) {
 			// TODO: Return a leaf node consisting of the only label in data
-			return null;
+			return new DTLeaf<>(data.get(0).getSecond());
 		} else {
 			// TODO: Return an interior node.
 			//  If restrictFeatures is false, call allFeatures.apply() to get a complete list
@@ -65,8 +64,33 @@ public class DTTrainer<V,L, F, FV extends Comparable<FV>> {
 			//  Note: It is possible for the split to fail; that is, you can have a split
 			//  in which one branch has zero elements. In this case, return a leaf node
 			//  containing the most popular label in the branch that has elements.
-			return null;
-		}		
+			ArrayList<Duple<F,FV>> featureValues;
+			Duple<F,FV> bestFeatureValue = null;
+			double maxGain = -Double.MAX_VALUE;
+			ArrayList<Duple<V,L>> leftSplit = null;
+			ArrayList<Duple<V,L>> rightSplit = null;
+
+			if(!restrictFeatures)
+				featureValues = allFeatures.apply(data);
+			else
+				featureValues = reducedFeatures(data, allFeatures, (int) Math.sqrt(allFeatures.apply(data).size()));
+
+			for (Duple<F,FV> featureValue : featureValues) {
+				Duple<ArrayList<Duple<V, L>>, ArrayList<Duple<V, L>>> split = splitOn(data, featureValue.getFirst(), featureValue.getSecond(), getFeatureValue);
+				double gain = gain(data, split.getFirst(), split.getSecond());
+
+				if (gain > maxGain) {
+					maxGain = gain;
+					bestFeatureValue = featureValue;
+					leftSplit = split.getFirst();
+					rightSplit = split.getSecond();
+				}
+			}
+			if (rightSplit.size() == 0 || leftSplit.size() == 0)
+				return new DTLeaf<>(mostPopularLabelFrom(leftSplit.size() > 0 ? leftSplit : rightSplit));
+			else
+				return new DTInterior<>(bestFeatureValue.getFirst(), bestFeatureValue.getSecond(), train(leftSplit), train(rightSplit),  getFeatureValue, successor);
+		}
 	}
 
 	public static <V,L> L mostPopularLabelFrom(ArrayList<Duple<V, L>> data) {
@@ -81,7 +105,15 @@ public class DTTrainer<V,L, F, FV extends Comparable<FV>> {
 	//    an `ArrayList` that is the same length as `data`, where each element is selected randomly
 	//    from `data`. Should pass `DTTest.testResample()`.
 	public static <V,L> ArrayList<Duple<V,L>> resample(ArrayList<Duple<V,L>> data) {
-		return null;
+		ArrayList<Duple<V,L>> resampledList = new ArrayList<>();
+		Random random = new Random();
+
+		for (Duple<V,L> item: data) {
+			int randomIndex = random.nextInt(data.size());
+			resampledList.add(data.get(randomIndex));
+		}
+
+		return resampledList;
 	}
 
 	public static <V,L> double getGini(ArrayList<Duple<V,L>> data) {
@@ -90,14 +122,28 @@ public class DTTrainer<V,L, F, FV extends Comparable<FV>> {
 		//  Use of a Histogram<L> for this purpose is recommended.
 		//  Gini coefficient is 1 - sum(for all labels i, p_i^2)
 		//  Should pass DTTest.testGini().
-		return 1.0;
+		Map<L, Integer> labels = new HashMap<>();
+		double ginicoef = 1.0;
+		double totalItems = data.size();
+
+		for (Duple<V,L> item : data) {
+			L label = item.getSecond();
+			labels.put(label, labels.getOrDefault(label, 0) + 1);
+		}
+
+		for (int lablecount : labels.values()) {
+			double p = lablecount / totalItems;
+			ginicoef -= p * p;
+		}
+
+		return ginicoef;
 	}
 
 	public static <V,L> double gain(ArrayList<Duple<V,L>> parent, ArrayList<Duple<V,L>> child1,
 									ArrayList<Duple<V,L>> child2) {
 		// TODO: Calculate the gain of the split. Add the gini values for the children.
 		//  Subtract that sum from the gini value for the parent. Should pass DTTest.testGain().
-		return 0;
+		return getGini(parent) - (getGini(child1) + getGini(child2));
 	}
 
 	public static <V,L, F, FV  extends Comparable<FV>> Duple<ArrayList<Duple<V,L>>,ArrayList<Duple<V,L>>> splitOn
@@ -109,6 +155,16 @@ public class DTTrainer<V,L, F, FV extends Comparable<FV>> {
 		//  returned list should be everything else from this list.
 		//  Should pass DTTest.testSplit().
 
-		return null;
+		ArrayList<Duple<V,L>> leftSplit = new ArrayList<>();
+		ArrayList<Duple<V,L>> rightSplit = new ArrayList<>();
+
+		for(Duple<V, L> item : data){
+			if(getFeatureValue.apply(item.getFirst(), feature).compareTo(featureValue) <= 0)
+				leftSplit.add(item);
+			else
+				rightSplit.add(item);
+		}
+
+		return new Duple<>(leftSplit, rightSplit);
 	}
 }
